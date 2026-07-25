@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>每日反思记录 - linghown</title>
+<style>
+  :root {
+    --bg: #f8f9fa;
+    --card-bg: #ffffff;
+    --text: #2d3436;
+    --text-secondary: #636e72;
+    --green: #00b894;
+    --green-bg: #e6f9f3;
+    --red: #e17055;
+    --red-bg: #fff0ed;
+    --blue: #0984e3;
+    --blue-bg: #e8f4fd;
+    --border: #e0e4e8;
+    --shadow: 0 1px 3px rgba(0,0,0,0.08);
+    --radius: 12px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+    min-height: 100vh;
+  }
+
+  .header {
+    background: linear-gradient(135deg, #0984e3, #6c5ce7);
+    color: #fff;
+    padding: 48px 24px 36px;
+    text-align: center;
+  }
+
+  .header h1 {
+    font-size: 28px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    letter-spacing: 0.5px;
+  }
+
+  .header p {
+    font-size: 15px;
+    opacity: 0.85;
+  }
+
+  .header .github-link {
+    display: inline-block;
+    margin-top: 16px;
+    color: #fff;
+    text-decoration: none;
+    font-size: 13px;
+    padding: 6px 18px;
+    border: 1.5px solid rgba(255,255,255,0.4);
+    border-radius: 20px;
+    transition: all 0.2s;
+  }
+
+  .header .github-link:hover {
+    background: rgba(255,255,255,0.15);
+    border-color: rgba(255,255,255,0.7);
+  }
+
+  .container {
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 32px 20px 60px;
+  }
+
+  .day-card {
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    margin-bottom: 28px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+  }
+
+  .day-header {
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .day-header h2 {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .day-header .date-badge {
+    font-size: 13px;
+    color: var(--text-secondary);
+    background: var(--bg);
+    padding: 4px 12px;
+    border-radius: 14px;
+  }
+
+  .day-body { padding: 20px 24px; }
+
+  .section { margin-bottom: 24px; }
+  .section:last-child { margin-bottom: 0; }
+
+  .section-title {
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .section-title .icon {
+    font-size: 20px;
+    line-height: 1;
+  }
+
+  .card-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .item-card {
+    padding: 14px 18px;
+    border-radius: 10px;
+    font-size: 14.5px;
+  }
+
+  .item-card.good {
+    background: var(--green-bg);
+    border-left: 4px solid var(--green);
+  }
+
+  .item-card.bad {
+    background: var(--red-bg);
+    border-left: 4px solid var(--red);
+  }
+
+  .item-card .item-label {
+    font-weight: 600;
+    font-size: 13px;
+    margin-bottom: 6px;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .item-card.good .item-label { color: var(--green); }
+  .item-card.bad .item-label { color: var(--red); }
+
+  .item-card .item-title {
+    font-weight: 600;
+    font-size: 15px;
+    margin-bottom: 4px;
+  }
+
+  .item-card .item-detail {
+    color: var(--text-secondary);
+    font-size: 13.5px;
+    margin-top: 4px;
+  }
+
+  .insight-box {
+    background: var(--blue-bg);
+    border-radius: 10px;
+    padding: 14px 18px;
+    font-size: 14px;
+    color: #2d5270;
+  }
+
+  .insight-box ul {
+    list-style: none;
+    padding: 0;
+  }
+
+  .insight-box li {
+    padding: 3px 0;
+    padding-left: 16px;
+    position: relative;
+  }
+
+  .insight-box li::before {
+    content: "▸";
+    position: absolute;
+    left: 0;
+    color: var(--blue);
+    font-weight: bold;
+  }
+
+  .plan-list {
+    list-style: none;
+    padding: 0;
+  }
+
+  .plan-list li {
+    padding: 8px 14px;
+    margin-bottom: 6px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .plan-list li .checkbox {
+    width: 18px;
+    height: 18px;
+    border: 2px solid #b2bec3;
+    border-radius: 4px;
+    flex-shrink: 0;
+  }
+
+  .note {
+    font-size: 13px;
+    color: var(--text-secondary);
+    font-style: italic;
+    text-align: right;
+  }
+
+  .divider {
+    border: none;
+    border-top: 1px dashed var(--border);
+    margin: 18px 0;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text-secondary);
+  }
+
+  .empty-state .big-icon { font-size: 48px; margin-bottom: 16px; }
+  .empty-state p { font-size: 15px; }
+
+  footer {
+    text-align: center;
+    padding: 24px;
+    color: var(--text-secondary);
+    font-size: 13px;
+    border-top: 1px solid var(--border);
+    margin-top: 20px;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>📓 每日反思记录</h1>
+  <p>记录做对与做错的事，持续精进，日日更新</p>
+  <a class="github-link" href="https://github.com/linghown/daily-reflection" target="_blank">View on GitHub ↗</a>
+</div>
+
+<div class="container">
+
+  <!-- 2026-07-25 -->
+  <div class="day-card">
+    <div class="day-header">
+      <h2>2026年7月25日（周五）</h2>
+      <span class="date-badge">📅 Jul 25, 2026</span>
+    </div>
+    <div class="day-body">
+
+      <!-- 做对的事 -->
+      <div class="section">
+        <div class="section-title">
+          <span class="icon">✅</span> 做对的事
+        </div>
+        <div class="card-list">
+          <div class="item-card good">
+            <div class="item-label">正确决策</div>
+            <div class="item-title">参加会议，学习 SATS 在 IB 期非小细胞肺癌中的影响</div>
+            <div class="item-detail">拓展了专业知识面，了解了 SATS 在早期 NSCLC 治疗中的研究进展和临床意义</div>
+          </div>
+        </div>
+        <div class="insight-box" style="margin-top: 14px;">
+          <strong>💡 复盘</strong>
+          <ul>
+            <li>主动参与学术会议是提升专业能力的重要途径</li>
+            <li>SATS 相关内容值得后续深入查阅文献，加深理解</li>
+          </ul>
+        </div>
+      </div>
+
+      <hr class="divider">
+
+      <!-- 做错的事 -->
+      <div class="section">
+        <div class="section-title">
+          <span class="icon">❌</span> 做错的事 / 待改进
+        </div>
+        <div class="card-list">
+          <div class="item-card bad">
+            <div class="item-label">失误 & 教训</div>
+            <div class="item-title">把 ChatGPT 里的 GitHub 删掉了</div>
+            <div class="item-detail">
+              <strong>问题分析：</strong>操作时不够谨慎，可能因为被限制导致不便<br>
+              <strong>改进措施：</strong>晚上下载回来；以后删除关联前先确认后果
+            </div>
+          </div>
+        </div>
+        <div class="insight-box" style="margin-top: 14px; background: #fff0ed;">
+          <strong>💡 复盘</strong>
+          <ul>
+            <li>工具之间的关联删除要三思而后行</li>
+            <li>被限制时不要冲动操作，先了解限制原因再决定</li>
+          </ul>
+        </div>
+      </div>
+
+      <hr class="divider">
+
+      <!-- 今日改进计划 -->
+      <div class="section">
+        <div class="section-title">
+          <span class="icon">🎯</span> 今日改进计划
+        </div>
+        <ul class="plan-list">
+          <li><span class="checkbox"></span> 晚上重新下载/配置 ChatGPT 中的 GitHub 集成</li>
+          <li><span class="checkbox"></span> 查阅 SATS 在 IB 期 NSCLC 中的相关文献</li>
+        </ul>
+      </div>
+
+      <p class="note">记录时间：2026-07-25 12:59</p>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  linghown · 每日反思记录 · <a href="https://github.com/linghown/daily-reflection" style="color: var(--blue);">GitHub</a>
+</footer>
+
+</body>
+</html>
