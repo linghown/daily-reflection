@@ -73,6 +73,8 @@
   .item-card .item-detail { color: var(--text-secondary); font-size: 12.5px; margin-top: 3px; line-height: 1.55; }
   .item-card.good .item-title { color: #0b7a4b; }
   .item-card.bad .item-title { color: #c0392b; }
+  .item-images { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-top: 10px; }
+  .item-images img { width: 100%; border-radius: 8px; object-fit: cover; aspect-ratio: 3/4; }
 
   .day-stats {
     display: flex; gap: 16px; margin-bottom: 14px;
@@ -133,6 +135,10 @@
         <div class="item-card good">
           <div class="item-title">找了工人师傅准备重刷墙面，也联系了做门的师傅准备换门</div>
           <div class="item-detail">主动改善居住环境，把想做的事落地。墙面翻新和换门都是容易拖延的家务事，能同时推进两项，说明行动力在线。家是待得最久的地方，值得花心思打理</div>
+          <div class="item-images">
+            <img src="0806-wall-before.jpg" alt="墙面施工前" loading="lazy">
+            <img src="0806-wall-after.jpg" alt="墙面施工后" loading="lazy">
+          </div>
         </div>
       </div>
     </div>
