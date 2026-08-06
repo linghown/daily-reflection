@@ -1,0 +1,849 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>每日对错</title>
+<style>
+  :root {
+    --bg: #f8f9fa; --card-bg: #ffffff; --text: #2d3436;
+    --text-secondary: #636e72; --green: #00b894; --green-bg: #e6f9f3;
+    --red: #e17055; --red-bg: #fff0ed; --blue: #0984e3; --blue-bg: #e8f4fd;
+    --border: #e0e4e8; --shadow: 0 1px 3px rgba(0,0,0,0.08); --radius: 12px;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    background: var(--bg); color: var(--text); line-height: 1.7; min-height: 100vh;
+  }
+  .header {
+    background: linear-gradient(135deg, #0984e3, #6c5ce7); color: #fff;
+    padding: 36px 24px 28px; text-align: center;
+    position: sticky; top: 0; z-index: 10;
+  }
+  .header h1 { font-size: 22px; font-weight: 700; margin-bottom: 4px; letter-spacing: 1px; }
+  .header p { font-size: 12px; opacity: 0.8; }
+  .container { max-width: 780px; margin: 0 auto; padding: 24px 20px 60px; }
+
+  .quick-nav {
+    display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px;
+    justify-content: center;
+  }
+  .quick-nav a {
+    text-decoration: none; font-size: 12px; padding: 4px 10px;
+    background: var(--card-bg); border: 1px solid var(--border);
+    border-radius: 14px; color: var(--text-secondary); white-space: nowrap;
+    transition: all 0.15s;
+  }
+  .quick-nav a:hover { background: var(--blue); color: #fff; border-color: var(--blue); }
+
+  .day-card {
+    background: var(--card-bg); border-radius: var(--radius);
+    box-shadow: var(--shadow); margin-bottom: 24px; overflow: hidden;
+    border: 1px solid var(--border);
+  }
+  .day-header {
+    padding: 16px 22px; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+    cursor: pointer; user-select: none;
+  }
+  .day-header:hover { background: #fafbfc; }
+  .day-header h2 { font-size: 16px; font-weight: 700; color: var(--text); }
+  .day-header .date-badge {
+    font-size: 12px; color: var(--text-secondary); background: var(--bg);
+    padding: 3px 10px; border-radius: 12px;
+  }
+  .day-body { padding: 18px 22px; }
+  .section { margin-bottom: 20px; }
+  .section:last-child { margin-bottom: 0; }
+  .section-title {
+    font-size: 14px; font-weight: 700; margin-bottom: 10px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .section-title .icon { font-size: 18px; line-height: 1; }
+  .card-list { display: flex; flex-direction: column; gap: 8px; }
+  .item-card {
+    padding: 12px 16px; border-radius: 9px; font-size: 13.5px;
+    transition: transform 0.12s;
+  }
+  .item-card:hover { transform: translateX(3px); }
+  .item-card.good { background: var(--green-bg); border-left: 4px solid var(--green); }
+  .item-card.bad { background: var(--red-bg); border-left: 4px solid var(--red); }
+  .item-card .item-title { font-weight: 600; font-size: 14px; margin-bottom: 2px; }
+  .item-card .item-detail { color: var(--text-secondary); font-size: 12.5px; margin-top: 3px; line-height: 1.55; }
+  .item-card.good .item-title { color: #0b7a4b; }
+  .item-card.bad .item-title { color: #c0392b; }
+
+  .day-stats {
+    display: flex; gap: 16px; margin-bottom: 14px;
+  }
+  .day-stats .stat {
+    font-size: 12px; color: var(--text-secondary);
+    display: flex; align-items: center; gap: 4px;
+  }
+  .day-stats .stat .num { font-weight: 700; font-size: 16px; }
+  .stat-good .num { color: var(--green); }
+  .stat-bad .num { color: var(--red); }
+
+  .divider { border: none; border-top: 1px dashed var(--border); margin: 16px 0; }
+  footer {
+    text-align: center; padding: 20px; color: var(--text-secondary);
+    font-size: 12px; border-top: 1px solid var(--border); margin-top: 20px;
+  }
+
+  .toggle-icon { display: none; }
+  .day-card.collapsed .day-body { display: none; }
+  .day-card.collapsed .toggle-icon { transform: rotate(-90deg); }
+
+  .back-top {
+    position: fixed; bottom: 24px; right: 24px;
+    width: 40px; height: 40px; background: var(--blue); color: #fff;
+    border: none; border-radius: 50%; font-size: 18px; cursor: pointer;
+    box-shadow: 0 2px 8px rgba(9,132,227,0.35); display: none;
+    z-index: 20; transition: opacity 0.2s;
+  }
+  .back-top.visible { display: block; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>每日对错</h1>
+  <p>记录每天做对与做错的事</p>
+</div>
+
+<div class="container">
+
+<!-- 8月6日 -->
+<div class="day-card" id="day-0806">
+  <div class="day-header" onclick="this.parentElement.classList.toggle('collapsed')">
+    <h2>8月6日（周四）</h2>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <span class="date-badge">📅 Aug 6, 2026</span>
+      <span class="toggle-icon">▼</span>
+    </div>
+  </div>
+  <div class="day-body">
+    <div class="day-stats">
+      <span class="stat stat-good">✅ <span class="num">1</span> 做对</span>
+    </div>
+    <div class="section">
+      <div class="section-title"><span class="icon">✅</span> 做对的事</div>
+      <div class="card-list">
+        <div class="item-card good">
+          <div class="item-title">找了工人师傅准备重刷墙面，也联系了做门的师傅准备换门</div>
+          <div class="item-detail">主动改善居住环境，把想做的事落地。墙面翻新和换门都是容易拖延的家务事，能同时推进两项，说明行动力在线。家是待得最久的地方，值得花心思打理</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 8月4日 -->
+<div class="day-card" id="day-0804">
+  <div class="day-header" onclick="this.parentElement.classList.toggle('collapsed')">
+    <h2>8月4日（周二）</h2>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <span class="date-badge">📅 Aug 4, 2026</span>
+      <span class="toggle-icon">▼</span>
+    </div>
+  </div>
+  <div class="day-body">
+    <div class="day-stats">
+      <span class="stat stat-good">✅ <span class="num">1</span> 做对</span>
+    </div>
+    <div class="section">
+      <div class="section-title"><span class="icon">✅</span> 做对的事</div>
+      <div class="card-list">
+        <div class="item-card good">
+          <div class="item-title">提前跑完需要的数据，结论证实我是正确的</div>
+          <div class="item-detail">不打无准备之仗，提前验证自己的判断。这种"先跑数据再下结论"的严谨态度，既避免了盲目行动，也让自己更有底气。事实证明，提前准备 + 数据验证 = 信心 + 正确决策</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 8月3日 -->
+<div class="day-card" id="day-0803">
+  <div class="day-header" onclick="this.parentElement.classList.toggle('collapsed')">
+    <h2>8月3日（周一）</h2>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <span class="date-badge">📅 Aug 3, 2026</span>
+      <span class="toggle-icon">▼</span>
+    </div>
+  </div>
+  <div class="day-body">
+    <div class="day-stats">
+      <span class="stat stat-good">✅ <span class="num">1</span> 做对</span>
+      <span class="stat stat-bad">❌ <span class="num">1</span> 做错</span>
+    </div>
+    <div class="section">
+      <div class="section-title"><span class="icon">✅</span> 做对的事</div>
+      <div class="card-list">
+        <div class="item-card good">
+          <div class="item-title">想到立即去做，行动力执行力超强</div>
+          <div class="item-detail">没有拖延等待，有了想法马上落地。这种"想到就做"的劲头很宝贵，是成事的关键，继续保持</div>
+        </div>
+      </div>
+    </div>
+    <hr class="divider">
+    <div class="section">
+      <div class="section-title"><span class="icon">❌</span> 做错的事</div>
+      <div class="card-list">
+        <div class="item-card bad">
+          <div class="item-title">对会诊病人判断不够及时，外伤后突发皮下气肿没第一时间发现</div>
+          <div class="item-detail">外伤后突发皮下气肿是危险信号，本应高度警惕。改进：外伤病人常规排查皮下气肿/气胸等并发症；发现异常体征立即评估，不依赖第一印象，宁可多查一次也别漏掉</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 8月2日 -->
+<div class="day-card" id="day-0802">
+  <div class="day-header" onclick="this.parentElement.classList.toggle('collapsed')">
+    <h2>8月2日（周日）</h2>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <span class="date-badge">📅 Aug 2, 2026</span>
+      <span class="toggle-icon">▼</span>
+    </div>
+  </div>
+  <div class="day-body">
+    <div class="day-stats">
+      <span class="stat stat-good">✅ <span class="num">1</span> 做对</span>
+      <span class="stat stat-bad">❌ <span class="num">1</span> 做错</span>
+    </div>
+    <div class="section">
+      <div class="section-title"><span class="icon">✅</span> 做对的事</div>
+      <div class="card-list">
+        <div class="item-card good">
+          <div class="item-title">发现了一家很好吃的餐厅</div>
+          <div class="item-detail">生活中发现美好也是一种能力，好的食物能治愈心情，值得记住这个发现</div>
+        </div>
+      </div>
+    </div>
+    <hr class="divider">
+    <div class="section">
+      <div class="section-title"><span class="icon">❌</span> 做错的事</div>
+      <div class="card-list">
+        <div class="item-card bad">
+          <div class="item-title">又吵架了</div>
+          <div class="item-detail">情绪管理仍需加强，吵架解决不了问题。改进：下次分歧时先暂停，冷静后再沟通，试着站在对方角度想一想</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 8月1日 -->
+<div class="day-card" id="day-0801">
+  <div class="day-header" onclick="this.parentElement.classList.toggle('collapsed')">
+    <h2>8月1日（周六）</h2>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <span class="date-badge">📅 Aug 1, 2026</span>
+      <span class="toggle-icon">▼</span>
+    </div>
+  </div>
+  <div class="day-body">
+    <div class="day-stats">
+      <span class="stat stat-good">✅ <span class="num">2</span> 做对</span>
+      <span class="stat stat-bad">❌ <span class="num">1</span> 做错</span>
+    </div>
+    <div class="section">
+      <div class="section-title"><span class="icon">✅</span> 做对的事</div>
+      <div class="card-list">
+        <div class="item-card good">
+          <div class="item-title">今天也去工作了</div>
+          <div class="item-detail">周末本可以休息，仍然坚持到岗，责任心在线，没有偷懒</div>
+        </div>
+        <div class="item-card good">
+          <div class="item-title">早点回来了</div>
+          <div class="item-detail">没有在外面耗到很晚，给自己留出了休息和陪伴家人的时间，节奏更稳</div>
+        </div>
+      </div>
+    </div>
+    <hr class="divider">
+    <div class="section">
+      <div class="section-title"><span class="icon">❌</span> 做错的事</div>
+      <div class="card-list">
+        <div class="item-card bad">
+          <div class="item-title">午休被病人电话吵醒，第一反应是烦躁和不耐烦</div>
+          <div class="item-detail">困倦时情绪控制下降，预设对方"打扰"自己，但对方确有紧急重要的事情。改进：接电话前先深呼吸两秒再开口；不预设来电意图</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 7月31日 -->
+<div class="day-card" id="day-0731">
+  <div class="day-header" onclick="this.parentElement.classList.toggle('collapsed')">
+    <h2>7月31日（周四）</h2>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <span class="date-badge">📅 Jul 31, 2026</span>
+      <span class="toggle-icon">▼</span>
+    </div>
+  </div>
+  <div class="day-body">
+    <div class="day-stats">
+      <span class="stat stat-bad">❌ <span class="num">2</span> 做错</span>
+    </div>
+    <div class="section">
+      <div class="section-title"><span class="icon">❌</span> 做错的事</div>
+      <div class="card-list">
+        <div class="item-card bad">
+          <div class="item-title">跟媳妇吵架，还说了脏话</div>
+          <div class="item-detail">情绪失控升级到语言暴力。改进：冷静后主动道歉，情绪激动时先离开现场冷静几分钟再沟通</div>
+        </div>
+        <div class="item-card bad">
+          <div class="item-title">转了 5000 块钱</div>
+          <div class="item-detail">—</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 7月29日 -->
+<div class="day-card" id="day-0729">
+  <div class="day-header" onclick="this.parentElement.classList.toggle('collapsed')">
+    <h2>7月29日（周三）</h2>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <span class="date-badge">📅 Jul 29, 2026</span>
+      <span class="toggle-icon">▼</span>
+    </div>
+  </div>
+  <div class="day-body">
+    <div class="day-stats">
+      <span class="stat stat-good">✅ <span class="num">2</span> 做对</span>
+      <span class="stat stat-bad">❌ <span class="num">1</span> 做错</span>
+    </div>
+    <div class="section">
+      <div class="section-title"><span class="icon">✅</span> 做对的事</div>
+      <div class="card-list">
+        <div class="item-card good">
+          <div class="item-title">用 Working Copy 把 iOS 版 Obsidian 和 GitHub 成功连接</div>
+          <div class="item-detail">实现了手机端和云端笔记的实时同步，花了钱但解决了核心需求，物有所值</div>
+        </div>
+        <div class="item-card good">
+          <div class="item-title">付费购买 Working Copy，承认好工具值得投资</div>
+          <div class="item-detail">愿意为效率工具付费是成熟的认知，免费往往意味着功能受限或体验打折</div>
+        </div>
+      </div>
+    </div>
+    <hr class="divider">
+    <div class="section">
+      <div class="section-title"><span class="icon">❌</span> 做错的事</div>
+      <div class="card-list">
+        <div class="item-card bad">
+          <div class="item-title">做手术时没忍住说了巡回护士</div>
+          <div class="item-detail">情绪控制仍需加强，手术室里当众批评同事会影响团队氛围和配合。改进：术中有问题私下沟通</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 7月28日 -->
+<div class="day-card" id="day-0728">
+  <div class="day-header" onclick="this.parentElement.classList.toggle('collapsed')">
+    <h2>7月28日（周二）</h2>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <span class="date-badge">📅 Jul 28, 2026</span>
+      <span class="toggle-icon">▼</span>
+    </div>
+  </div>
+  <div class="day-body">
+    <div class="day-stats">
+      <span class="stat stat-good">✅ <span class="num">1</span> 做对</span>
+      <span class="stat stat-bad">❌ <span class="num">1</span> 做错</span>
+    </div>
+    <div class="section">
+      <div class="section-title"><span class="icon">✅</span> 做对的事</div>
+      <div class="card-list">
+        <div class="item-card good">
+          <div class="item-title">和城龙一起修改文章，发现了重大数据问题</div>
+          <div class="item-detail">合作审稿比单打独斗更有效，及时发现并纠正了潜在的数据错误，避免了后续麻烦</div>
+        </div>
+      </div>
+    </div>
+    <hr class="divider">
+    <div class="section">
+      <div class="section-title"><span class="icon">❌</span> 做错的事</div>
+      <div class="card-list">
+        <div class="item-card bad">
+          <div class="item-title">暴雨天顶着暴雨回家</div>
+          <div class="item-detail">为了赶回家忽视了安全风险，暴雨中出行非常危险。改进：极端天气时优先考虑安全，就近避雨等待雨势减弱再出发</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 7月27日 -->
+<div class="day-card" id="day-0727">
+  <div class="day-header" onclick="this.parentElement.classList.toggle('collapsed')">
+    <h2>7月27日（周一）</h2>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <span class="date-badge">📅 Jul 27, 2026</span>
+      <span class="toggle-icon">▼</span>
+    </div>
+  </div>
+  <div class="day-body">
+    <div class="day-stats">
+      <span class="stat stat-good">✅ <span class="num">1</span> 做对</span>
+      <span class="stat stat-bad">❌ <span class="num">2</span> 做错</span>
+    </div>
+    <div class="section">
+      <div class="section-title"><span class="icon">✅</span> 做对的事</div>
+      <div class="card-list">
+        <div class="item-card good">
+          <div class="item-title">完成右上肺叶切除手术，优化了过右上肺静脉的操作流程</div>
+          <div class="item-detail">手术技术精进，对关键解剖结构的处理更加熟练，提升了手术效率和安全性</div>
+        </div>
+      </div>
+    </div>
+    <hr class="divider">
+    <div class="section">
+      <div class="section-title"><span class="icon">❌</span> 做错的事</div>
+      <div class="card-list">
+        <div class="item-card bad">
+          <div class="item-title">回来后没忍住，在沙发上睡了很久</div>
+          <div class="item-detail">过度疲劳导致失去自控力，打乱了晚间节奏。改进：回家后先洗漱换衣，避免直接躺沙发；如果实在太累，设 20 分钟闹钟小憩</div>
+        </div>
+        <div class="item-card bad">
+          <div class="item-title">用 Codex 直接操作电脑清理 C 盘，误删了桌面重要文件</div>
+          <div class="item-detail">让 AI 直接操作系统文件过于冒险，缺乏安全边界意识。改进：AI 操作本地文件前先确认范围和备份；重要文件定期备份到云端或移动硬盘</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 7月26日 -->
+<div class="day-card" id="day-0726">
+  <div class="day-header" onclick="this.parentElement.classList.toggle('collapsed')">
+    <h2>7月26日（周日）</h2>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <span class="date-badge">📅 Jul 26, 2026</span>
+      <span class="toggle-icon">▼</span>
+    </div>
+  </div>
+  <div class="day-body">
+    <div class="day-stats">
+      <span class="stat stat-good">✅ <span class="num">2</span> 做对</span>
+      <span class="stat stat-bad">❌ <span class="num">1</span> 做错</span>
+    </div>
+    <div class="section">
+      <div class="section-title"><span class="icon">✅</span> 做对的事</div>
+      <div class="card-list">
+        <div class="item-card good">
+          <div class="item-title">重新设置 ChatGPT 和 WorkBuddy</div>
+          <div class="item-detail">优化了 AI 工具配置，让助手更好地服务于工作和学习</div>
+        </div>
+        <div class="item-card good">
+          <div class="item-title">通过 WorkBuddy 学习到很多新东西</div>
+          <div class="item-detail">AI 助手帮助拓展了知识边界，加速了个人成长</div>
+        </div>
+      </div>
+    </div>
+    <hr class="divider">
+    <div class="section">
+      <div class="section-title"><span class="icon">❌</span> 做错的事</div>
+      <div class="card-list">
+        <div class="item-card bad">
+          <div class="item-title">凌晨快三点才睡觉</div>
+          <div class="item-detail">作息不规律，影响第二天状态和身体健康。改进：设定睡前闹钟提醒，23:30 前放下手机，逐步调整作息</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 7月25日 -->
+<div class="day-card" id="day-0725">
+  <div class="day-header" onclick="this.parentElement.classList.toggle('collapsed')">
+    <h2>7月25日（周五）</h2>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <span class="date-badge">📅 Jul 25, 2026</span>
+      <span class="toggle-icon">▼</span>
+    </div>
+  </div>
+  <div class="day-body">
+    <div class="day-stats">
+      <span class="stat stat-good">✅ <span class="num">1</span> 做对</span>
+      <span class="stat stat-bad">❌ <span class="num">1</span> 做错</span>
+    </div>
+    <div class="section">
+      <div class="section-title"><span class="icon">✅</span> 做对的事</div>
+      <div class="card-list">
+        <div class="item-card good">
+          <div class="item-title">参加会议，学习 SATS 在 IB 期非小细胞肺癌中的影响</div>
+          <div class="item-detail">拓展了专业知识面，了解了 SATS 在早期 NSCLC 治疗中的研究进展和临床意义</div>
+        </div>
+      </div>
+    </div>
+    <hr class="divider">
+    <div class="section">
+      <div class="section-title"><span class="icon">❌</span> 做错的事</div>
+      <div class="card-list">
+        <div class="item-card bad">
+          <div class="item-title">把 ChatGPT 里的 GitHub 删掉了</div>
+          <div class="item-detail">操作时不够谨慎，因被限制导致不便。改进：晚上下载回来；以后删除关联前先确认后果</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 7月23日 -->
+<div class="day-card" id="day-0723">
+  <div class="day-header" onclick="this.parentElement.classList.toggle('collapsed')">
+    <h2>7月23日（周四）</h2>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <span class="date-badge">📅 Jul 23, 2026</span>
+      <span class="toggle-icon">▼</span>
+    </div>
+  </div>
+  <div class="day-body">
+    <div class="day-stats">
+      <span class="stat stat-good">✅ <span class="num">2</span> 做对</span>
+      <span class="stat stat-bad">❌ <span class="num">1</span> 做错</span>
+    </div>
+    <div class="section">
+      <div class="section-title"><span class="icon">✅</span> 做对的事</div>
+      <div class="card-list">
+        <div class="item-card good">
+          <div class="item-title">ChatGPT 对文章进行了深层次的梳理，发现并改正了问题</div>
+          <div class="item-detail">善用 AI 工具辅助写作，提升了文章质量</div>
+        </div>
+        <div class="item-card good">
+          <div class="item-title">让国庆过伦理</div>
+          <div class="item-detail">推进了伦理审查流程，保障了研究合规性</div>
+        </div>
+      </div>
+    </div>
+    <hr class="divider">
+    <div class="section">
+      <div class="section-title"><span class="icon">❌</span> 做错的事</div>
+      <div class="card-list">
+        <div class="item-card bad">
+          <div class="item-title">没有及时会诊</div>
+          <div class="item-detail">建立会诊提醒机制，重要病例及时发起多学科讨论</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 7月22日 -->
+<div class="day-card" id="day-0722">
+  <div class="day-header" onclick="this.parentElement.classList.toggle('collapsed')">
+    <h2>7月22日（周三）</h2>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <span class="date-badge">📅 Jul 22, 2026</span>
+      <span class="toggle-icon">▼</span>
+    </div>
+  </div>
+  <div class="day-body">
+    <div class="day-stats">
+      <span class="stat stat-good">✅ <span class="num">1</span> 做对</span>
+      <span class="stat stat-bad">❌ <span class="num">1</span> 做错</span>
+    </div>
+    <div class="section">
+      <div class="section-title"><span class="icon">✅</span> 做对的事</div>
+      <div class="card-list">
+        <div class="item-card good">
+          <div class="item-title">换班</div>
+          <div class="item-detail">合理调配时间，保障了工作的连续性和个人安排</div>
+        </div>
+      </div>
+    </div>
+    <hr class="divider">
+    <div class="section">
+      <div class="section-title"><span class="icon">❌</span> 做错的事</div>
+      <div class="card-list">
+        <div class="item-card bad">
+          <div class="item-title">漏掉刘绍霞主任会诊</div>
+          <div class="item-detail">会诊安排需书面记录并设置提醒，避免遗漏重要专家会诊</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 7月21日 -->
+<div class="day-card" id="day-0721">
+  <div class="day-header" onclick="this.parentElement.classList.toggle('collapsed')">
+    <h2>7月21日（周二）</h2>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <span class="date-badge">📅 Jul 21, 2026</span>
+      <span class="toggle-icon">▼</span>
+    </div>
+  </div>
+  <div class="day-body">
+    <div class="day-stats">
+      <span class="stat stat-good">✅ <span class="num">1</span> 做对</span>
+      <span class="stat stat-bad">❌ <span class="num">1</span> 做错</span>
+    </div>
+    <div class="section">
+      <div class="section-title"><span class="icon">✅</span> 做对的事</div>
+      <div class="card-list">
+        <div class="item-card good">
+          <div class="item-title">科普视频、论文推进</div>
+          <div class="item-detail">同时推进科普传播和学术产出，两条线并行取得进展</div>
+        </div>
+      </div>
+    </div>
+    <hr class="divider">
+    <div class="section">
+      <div class="section-title"><span class="icon">❌</span> 做错的事</div>
+      <div class="card-list">
+        <div class="item-card bad">
+          <div class="item-title">暑假期间晚7点理发，人满</div>
+          <div class="item-detail">高峰时段提前预约，避免时间浪费在等待上</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 7月16日 -->
+<div class="day-card" id="day-0716">
+  <div class="day-header" onclick="this.parentElement.classList.toggle('collapsed')">
+    <h2>7月16日（周四）</h2>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <span class="date-badge">📅 Jul 16, 2026</span>
+      <span class="toggle-icon">▼</span>
+    </div>
+  </div>
+  <div class="day-body">
+    <div class="day-stats">
+      <span class="stat stat-good">✅ <span class="num">1</span> 做对</span>
+      <span class="stat stat-bad">❌ <span class="num">1</span> 做错</span>
+    </div>
+    <div class="section">
+      <div class="section-title"><span class="icon">✅</span> 做对的事</div>
+      <div class="card-list">
+        <div class="item-card good">
+          <div class="item-title">给周亚丽打电话，了解朋友的现状</div>
+          <div class="item-detail">主动联系朋友，关心他人近况，维系重要的人际关系</div>
+        </div>
+      </div>
+    </div>
+    <hr class="divider">
+    <div class="section">
+      <div class="section-title"><span class="icon">❌</span> 做错的事</div>
+      <div class="card-list">
+        <div class="item-card bad">
+          <div class="item-title">没有学习，没写文章</div>
+          <div class="item-detail">每日设定最低学习/写作目标，即使再忙也要完成底线任务</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 6月25日 -->
+<div class="day-card" id="day-0625">
+  <div class="day-header" onclick="this.parentElement.classList.toggle('collapsed')">
+    <h2>6月25日（周四）</h2>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <span class="date-badge">📅 Jun 25, 2026</span>
+      <span class="toggle-icon">▼</span>
+    </div>
+  </div>
+  <div class="day-body">
+    <div class="day-stats">
+      <span class="stat stat-good">✅ <span class="num">2</span> 做对</span>
+      <span class="stat stat-bad">❌ <span class="num">1</span> 做错</span>
+    </div>
+    <div class="section">
+      <div class="section-title"><span class="icon">✅</span> 做对的事</div>
+      <div class="card-list">
+        <div class="item-card good">
+          <div class="item-title">新校区监考</div>
+          <div class="item-detail">认真履行职责，保障了考试工作的顺利进行</div>
+        </div>
+        <div class="item-card good">
+          <div class="item-title">小放烧伤捐款</div>
+          <div class="item-detail">伸出援手帮助他人，体现了医者仁心和善意</div>
+        </div>
+      </div>
+    </div>
+    <hr class="divider">
+    <div class="section">
+      <div class="section-title"><span class="icon">❌</span> 做错的事</div>
+      <div class="card-list">
+        <div class="item-card bad">
+          <div class="item-title">吼孩子</div>
+          <div class="item-detail">控制情绪，对孩子多一份耐心，用沟通代替吼叫</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 6月17日 -->
+<div class="day-card" id="day-0617">
+  <div class="day-header" onclick="this.parentElement.classList.toggle('collapsed')">
+    <h2>6月17日（周三）</h2>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <span class="date-badge">📅 Jun 17, 2026</span>
+      <span class="toggle-icon">▼</span>
+    </div>
+  </div>
+  <div class="day-body">
+    <div class="day-stats">
+      <span class="stat stat-good">✅ <span class="num">1</span> 做对</span>
+      <span class="stat stat-bad">❌ <span class="num">1</span> 做错</span>
+    </div>
+    <div class="section">
+      <div class="section-title"><span class="icon">✅</span> 做对的事</div>
+      <div class="card-list">
+        <div class="item-card good">
+          <div class="item-title">朋友遇到亲人离世，不想去送最后一程，问意见</div>
+          <div class="item-detail">在朋友需要时提供支持，愿意倾听并给予建议</div>
+        </div>
+      </div>
+    </div>
+    <hr class="divider">
+    <div class="section">
+      <div class="section-title"><span class="icon">❌</span> 做错的事</div>
+      <div class="card-list">
+        <div class="item-card bad">
+          <div class="item-title">没有承接住情绪，以自己的感受先入为主</div>
+          <div class="item-detail">倾听时先放下自己的判断，先共情再建议，真正做到"先理解，后回应"</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 6月15日 -->
+<div class="day-card" id="day-0615">
+  <div class="day-header" onclick="this.parentElement.classList.toggle('collapsed')">
+    <h2>6月15日（周一）</h2>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <span class="date-badge">📅 Jun 15, 2026</span>
+      <span class="toggle-icon">▼</span>
+    </div>
+  </div>
+  <div class="day-body">
+    <div class="day-stats">
+      <span class="stat stat-good">✅ <span class="num">1</span> 做对</span>
+      <span class="stat stat-bad">❌ <span class="num">1</span> 做错</span>
+    </div>
+    <div class="section">
+      <div class="section-title"><span class="icon">✅</span> 做对的事</div>
+      <div class="card-list">
+        <div class="item-card good">
+          <div class="item-title">接触 AI，写论文</div>
+          <div class="item-detail">拥抱新技术，利用 AI 辅助学术写作，提升科研效率</div>
+        </div>
+      </div>
+    </div>
+    <hr class="divider">
+    <div class="section">
+      <div class="section-title"><span class="icon">❌</span> 做错的事</div>
+      <div class="card-list">
+        <div class="item-card bad">
+          <div class="item-title">孩子雾化</div>
+          <div class="item-detail">关注家人健康，孩子治疗期间给予更多陪伴和照顾</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 6月14日 -->
+<div class="day-card" id="day-0614">
+  <div class="day-header" onclick="this.parentElement.classList.toggle('collapsed')">
+    <h2>6月14日（周日）</h2>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <span class="date-badge">📅 Jun 14, 2026</span>
+      <span class="toggle-icon">▼</span>
+    </div>
+  </div>
+  <div class="day-body">
+    <div class="day-stats">
+      <span class="stat stat-good">✅ <span class="num">2</span> 做对</span>
+      <span class="stat stat-bad">❌ <span class="num">1</span> 做错</span>
+    </div>
+    <div class="section">
+      <div class="section-title"><span class="icon">✅</span> 做对的事</div>
+      <div class="card-list">
+        <div class="item-card good">
+          <div class="item-title">早起，继续前一天的换药，等主任</div>
+          <div class="item-detail">保持勤奋和责任心，主动跟进患者治疗</div>
+        </div>
+        <div class="item-card good">
+          <div class="item-title">睡好觉</div>
+          <div class="item-detail">重视休息，保持良好的身体状态是高效工作的基础</div>
+        </div>
+      </div>
+    </div>
+    <hr class="divider">
+    <div class="section">
+      <div class="section-title"><span class="icon">❌</span> 做错的事</div>
+      <div class="card-list">
+        <div class="item-card bad">
+          <div class="item-title">没有读书</div>
+          <div class="item-detail">坚持每日阅读习惯，哪怕只读10分钟也要保持输入</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 6月13日 -->
+<div class="day-card" id="day-0613">
+  <div class="day-header" onclick="this.parentElement.classList.toggle('collapsed')">
+    <h2>6月13日（周六）</h2>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <span class="date-badge">📅 Jun 13, 2026</span>
+      <span class="toggle-icon">▼</span>
+    </div>
+  </div>
+  <div class="day-body">
+    <div class="day-stats">
+      <span class="stat stat-good">✅ <span class="num">1</span> 做对</span>
+      <span class="stat stat-bad">❌ <span class="num">1</span> 做错</span>
+    </div>
+    <div class="section">
+      <div class="section-title"><span class="icon">✅</span> 做对的事</div>
+      <div class="card-list">
+        <div class="item-card good">
+          <div class="item-title">换药时挤压伤口，大量血块，丹毒入血，继发败血症</div>
+          <div class="item-detail">及时发现并处理了严重并发症，展现了临床警觉性和果断处置能力</div>
+        </div>
+      </div>
+    </div>
+    <hr class="divider">
+    <div class="section">
+      <div class="section-title"><span class="icon">❌</span> 做错的事</div>
+      <div class="card-list">
+        <div class="item-card bad">
+          <div class="item-title">没有提前和朋友联系</div>
+          <div class="item-detail">主动维护友谊，不要总是等对方联系，定期主动问候</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<button class="back-top" id="backTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+
+<footer>linghown · 每日对错</footer>
+
+<script>
+window.addEventListener('scroll', function(){
+  document.getElementById('backTop').classList.toggle('visible', window.scrollY > 400);
+});
+</script>
+
+</body>
+</html>
